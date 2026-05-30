@@ -23,6 +23,17 @@ Default local credentials:
 
 Set production values in environment variables before deployment. Use `.env.example` as the template.
 
+## Vercel Deployment
+
+Set these environment variables in Vercel:
+
+- `ADMIN_JWT_SECRET`
+- `ADMIN_USERNAME`
+- `ADMIN_PASSWORD`
+- `ANALYTICS_IP_SECRET`
+
+When `DATABASE_URL` is missing or still set to `file:./dev.db` on Vercel, the app initializes a temporary SQLite database under `/tmp` so the admin panel can log in instead of failing with a blank response. For persistent CMS edits and uploads in production, connect the project to durable database and file storage services.
+
 ## Pages
 
 - Home

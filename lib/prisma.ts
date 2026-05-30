@@ -1,7 +1,21 @@
 import { PrismaClient } from '@prisma/client';
+import { configureDatabaseUrl, ensureCmsDatabase } from './cms-runtime';
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+configureDatabaseUrl();
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+const prismaClient = globalForPrisma.prisma ?? new PrismaClient();
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prismaClient;
+
+export const prisma = prismaClient.$extends({
+  query: {
+    $allModels: {
+      async $allOperations({ args, query }) {
+        await ensureCmsDatabase(prismaClient);
+        return query(args);
+      }
+    }
+  }
+});

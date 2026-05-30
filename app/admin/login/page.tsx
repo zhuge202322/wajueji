@@ -21,7 +21,15 @@ export default function AdminLoginPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
-      const data = await res.json();
+      const raw = await res.text();
+      let data: { error?: string; ok?: boolean } = {};
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch {
+        data = {
+          error: raw || 'Login service returned an empty response',
+        };
+      }
       if (!res.ok) {
         setError(data.error || 'Login failed');
         return;

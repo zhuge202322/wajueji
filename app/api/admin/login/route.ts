@@ -4,18 +4,29 @@ import { prisma } from '@/lib/prisma';
 import { createSession } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
-  const { username, password } = await req.json();
+  try {
+    const { username, password } = await req.json();
 
-  if (!username || !password) {
-    return NextResponse.json({ error: 'Missing credentials' }, { status: 400 });
+    if (!username || !password) {
+      return NextResponse.json({ error: 'Missing credentials' }, { status: 400 });
+    }
+
+    const user = await prisma.adminUser.findUnique({ where: { username } });
+    if (!user) return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+
+    const ok = await bcrypt.compare(password, user.passwordHash);
+    if (!ok) return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+
+    await createSession({ id: user.id, username: user.username });
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error('Admin login failed:', error);
+    return NextResponse.json(
+      {
+        error:
+          'Admin login service is not ready. Check Vercel environment variables and redeploy.'
+      },
+      { status: 500 }
+    );
   }
-
-  const user = await prisma.adminUser.findUnique({ where: { username } });
-  if (!user) return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
-
-  const ok = await bcrypt.compare(password, user.passwordHash);
-  if (!ok) return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
-
-  await createSession({ id: user.id, username: user.username });
-  return NextResponse.json({ ok: true });
 }
