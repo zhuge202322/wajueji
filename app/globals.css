@@ -1,3 +1,14 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-brand-primary: #f07818;
+  --color-brand-secondary: #fff7f1;
+  --color-brand-accent: #365064;
+  --color-brand-dark: #22242a;
+  --color-brand-gray: #626b78;
+}
+
 :root {
   --accent: #f07818;
   --accent-dark: #c95b0f;
@@ -726,6 +737,12 @@ textarea {
   background: #fff7f1;
 }
 
+.catalog-sidebar__link--active {
+  color: var(--accent-dark);
+  background: #fff7f1;
+  font-weight: 800;
+}
+
 .catalog-tools {
   display: flex;
   justify-content: space-between;
@@ -736,6 +753,23 @@ textarea {
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 18px;
+}
+
+.catalog-empty {
+  border: 1px solid var(--line);
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 28px;
+}
+
+.catalog-empty h3 {
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+
+.catalog-empty p {
+  margin: 0;
+  color: var(--muted);
 }
 
 .catalog-tools h2 {

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, CalendarDays } from "lucide-react";
-import { news } from "@/lib/site-data";
+import { getSiteNews } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "News | Maredigger",
@@ -9,7 +9,11 @@ export const metadata: Metadata = {
     "Maredigger news and buying notes for used excavators, excavator spare parts and construction machinery export."
 };
 
-export default function NewsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function NewsPage() {
+  const news = await getSiteNews();
+
   return (
     <>
       <section className="page-hero page-hero--compact">

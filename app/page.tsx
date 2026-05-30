@@ -3,16 +3,19 @@ import Link from "next/link";
 import { ArrowRight, ClipboardCheck, PhoneCall } from "lucide-react";
 import {
   company,
-  news,
   processSteps,
   productGroups,
-  products,
   stats,
   strengths
 } from "@/lib/site-data";
 import { ProductCard } from "@/components/ProductCard";
+import { getSiteNews, getSiteProducts } from "@/lib/content";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const [products, news] = await Promise.all([getSiteProducts(), getSiteNews()]);
+
   return (
     <>
       <section className="hero">

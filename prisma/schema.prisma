@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String
+  slug      String    @unique
+  imageUrl  String?
+  nameFr    String    @default("")
+  nameEs    String    @default("")
+  nameAr    String    @default("")
+  sortOrder Int       @default(0)
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id                 Int            @id @default(autoincrement())
+  name               String
+  slug               String         @unique
+  shortDescription   String         @default("")
+  description        String         @default("")
+  featured           Boolean        @default(false)
+  sortOrder          Int            @default(0)
+  nameFr             String         @default("")
+  nameEs             String         @default("")
+  nameAr             String         @default("")
+  shortDescriptionFr String         @default("")
+  shortDescriptionEs String         @default("")
+  shortDescriptionAr String         @default("")
+  descriptionFr      String         @default("")
+  descriptionEs      String         @default("")
+  descriptionAr      String         @default("")
+  specs              String         @default("")
+  specsFr            String         @default("")
+  specsEs            String         @default("")
+  specsAr            String         @default("")
+  specsPdf           String?
+  formula            String         @default("")
+  formulaFr          String         @default("")
+  formulaEs          String         @default("")
+  formulaAr          String         @default("")
+  formulaPdf         String?
+  categories         Category[]
+  images             ProductImage[]
+  skus               ProductSku[]
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+}
+
+model ProductImage {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  src       String
+  alt       String   @default("")
+  sortOrder Int      @default(0)
+}
+
+model ProductSku {
+  id        Int               @id @default(autoincrement())
+  productId Int
+  product   Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String
+  nameFr    String            @default("")
+  nameEs    String            @default("")
+  nameAr    String            @default("")
+  image     String            @default("")
+  price     String            @default("")
+  size      String            @default("")
+  sortOrder Int               @default(0)
+  images    ProductSkuImage[]
+}
+
+model ProductSkuImage {
+  id        Int        @id @default(autoincrement())
+  skuId     Int
+  sku       ProductSku @relation(fields: [skuId], references: [id], onDelete: Cascade)
+  src       String
+  alt       String     @default("")
+  sortOrder Int        @default(0)
+}
+
+model Post {
+  id            Int      @id @default(autoincrement())
+  title         String
+  slug          String   @unique
+  excerpt       String   @default("")
+  content       String   @default("")
+  featuredImage String?
+  authorName    String   @default("Maredigger Team")
+  date          DateTime @default(now())
+  titleFr       String   @default("")
+  titleEs       String   @default("")
+  titleAr       String   @default("")
+  excerptFr     String   @default("")
+  excerptEs     String   @default("")
+  excerptAr     String   @default("")
+  contentFr     String   @default("")
+  contentEs     String   @default("")
+  contentAr     String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model SiteMedia {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  label     String
+  url       String   @default("")
+  kind      String   @default("text")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PageView {
+  id          Int      @id @default(autoincrement())
+  visitorId   String?
+  path        String
+  source      String   @default("direct")
+  referrer    String?
+  device      String?
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  isBot       Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([path])
+  @@index([source])
+  @@index([createdAt])
+  @@index([visitorId])
+}
