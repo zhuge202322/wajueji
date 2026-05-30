@@ -15,7 +15,7 @@ export async function PUT(req: NextRequest) {
   const items: { key: string; url: string }[] = Array.isArray(body?.items) ? body.items : [];
 
   if (items.length === 0) {
-    return NextResponse.json({ error: 'No items provided' }, { status: 400 });
+    return NextResponse.json({ error: '没有可保存的配置项' }, { status: 400 });
   }
 
   for (const item of items) {

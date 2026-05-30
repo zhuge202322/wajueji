@@ -61,7 +61,7 @@ export async function middleware(req: NextRequest) {
       const authorized = await verifyAdminToken(token);
       if (!authorized) {
         if (path.startsWith('/api/')) {
-          return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+          return NextResponse.json({ error: '未登录或登录已过期' }, { status: 401 });
         }
         const url = req.nextUrl.clone();
         url.pathname = '/admin/login';

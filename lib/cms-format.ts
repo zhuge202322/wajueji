@@ -30,7 +30,7 @@ export function formatProduct(p: any, locale: Locale = 'en'): any {
     name: pick(p.name, p.nameFr || '', p.nameEs || '', p.nameAr || '', locale),
     slug: p.slug,
     featured: !!p.featured,
-    permalink: `/product/${p.slug}`,
+    permalink: `/products/${p.slug}`,
     short_description: pick(
       p.shortDescription || '',
       p.shortDescriptionFr || '',

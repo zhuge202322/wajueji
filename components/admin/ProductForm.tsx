@@ -170,7 +170,7 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        setError(err.error || 'Save failed');
+        setError(err.error || '保存失败');
         return;
       }
       router.push('/admin/products');
@@ -184,14 +184,14 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
     <form onSubmit={onSubmit} className="max-w-5xl space-y-6">
       <div className="flex items-center justify-between">
         <Link href="/admin/products" className="inline-flex items-center gap-2 text-slate-600 font-medium hover:text-slate-800">
-          <ArrowLeft className="w-4 h-4" /> Back
+          <ArrowLeft className="w-4 h-4" /> 返回
         </Link>
         <button
           type="submit"
           disabled={busy}
           className="inline-flex items-center gap-2 bg-brand-primary text-white px-5 py-2.5 rounded-xl font-bold shadow hover:opacity-90 disabled:opacity-50"
         >
-          <Save className="w-4 h-4" /> {busy ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
+          <Save className="w-4 h-4" /> {busy ? '保存中…' : mode === 'create' ? '创建' : '更新'}
         </button>
       </div>
 
@@ -201,7 +201,7 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
 
       <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-2">Name *</label>
+          <label className="block text-sm font-bold text-slate-700 mb-2">产品名称（英文/默认）*</label>
           <input
             type="text"
             required
@@ -212,7 +212,7 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-2">Slug *</label>
+          <label className="block text-sm font-bold text-slate-700 mb-2">链接标识 *</label>
           <input
             type="text"
             required
@@ -220,11 +220,11 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
             onChange={(e) => { setSlug(e.target.value); setSlugTouched(true); }}
             className="w-full rounded-xl border border-slate-200 px-4 py-2.5 outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 font-mono text-sm"
           />
-          <p className="text-xs text-slate-500 mt-1">Used in the URL: /product/{slug || '...'}</p>
+          <p className="text-xs text-slate-500 mt-1">用于前台产品详情页地址：/products/{slug || '...'}</p>
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-2">Categories</label>
+          <label className="block text-sm font-bold text-slate-700 mb-2">所属分类</label>
           <div className="flex flex-wrap gap-2">
             {categories.map((c) => {
               const active = categoryIds.includes(c.id);
@@ -244,7 +244,7 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
               );
             })}
             {categories.length === 0 && (
-              <span className="text-sm text-slate-400">No categories yet.</span>
+              <span className="text-sm text-slate-400">暂无分类。</span>
             )}
           </div>
         </div>
@@ -258,22 +258,22 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
               className="w-4 h-4 rounded text-brand-primary border-slate-300 focus:ring-brand-primary/20"
             />
             <div>
-              <span className="text-sm font-bold text-slate-700 block">推荐产品 (Top Product)</span>
-              <span className="text-xs text-slate-500 block">勾选后该产品会显示在首页热门推荐 (Top Products) 区域</span>
+              <span className="text-sm font-bold text-slate-700 block">推荐产品</span>
+              <span className="text-xs text-slate-500 block">勾选后该产品会显示在首页热门推荐区域</span>
             </div>
           </label>
         </div>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 p-6">
-        <h3 className="text-sm font-bold text-slate-700 mb-3">Product Images</h3>
+        <h3 className="text-sm font-bold text-slate-700 mb-3">产品图片</h3>
         <MultiImageUploader value={images} onChange={setImages} />
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6">
         <div className="flex items-center justify-between border-b border-slate-100 pb-4">
           <div>
-            <h3 className="text-sm font-bold text-slate-700">多 SKU 规格/变体管理 (Product SKUs)</h3>
+            <h3 className="text-sm font-bold text-slate-700">多 SKU 规格/变体管理</h3>
             <p className="text-xs text-slate-500 mt-1">
               在这里可以为该产品添加多种不同的规格变体。每个变体有它对应的**主图**、**各语言下的规格名称**、价格和尺寸。
             </p>
@@ -311,7 +311,7 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
                 {/* 变体多张图片画廊上传 */}
                 <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3">
                   <span className="text-xs text-slate-600 font-extrabold uppercase tracking-wide flex items-center gap-1.5">
-                    <Layers className="w-4 h-4 text-brand-primary" /> 变体图片画廊 (支持上传多张并拖拽排序) *
+                    <Layers className="w-4 h-4 text-brand-primary" /> 变体图片画廊（支持上传多张并拖拽排序）*
                   </span>
                   <MultiImageUploader
                     value={sku.images || []}
@@ -323,41 +323,41 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
                 <div className="space-y-4 relative pt-2">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">变体名称 (英文 / 默认) *</label>
+                      <label className="block text-xs font-bold text-slate-600 mb-1">变体名称（英文/默认）*</label>
                       <input
                         type="text"
                         required
-                        placeholder="例如: 100g Box"
+                        placeholder="例如：100g 包装"
                         value={sku.name}
                         onChange={(e) => updateSku(sku.tempId!, 'name', e.target.value)}
                         className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-brand-primary"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">变体名称 (法语)</label>
+                      <label className="block text-xs font-bold text-slate-600 mb-1">变体名称（法语）</label>
                       <input
                         type="text"
-                        placeholder="例如: Boîte de 100g"
+                        placeholder="例如：Boite de 100g"
                         value={sku.nameFr || ''}
                         onChange={(e) => updateSku(sku.tempId!, 'nameFr', e.target.value)}
                         className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-brand-primary"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">变体名称 (西班牙语)</label>
+                      <label className="block text-xs font-bold text-slate-600 mb-1">变体名称（西班牙语）</label>
                       <input
                         type="text"
-                        placeholder="例如: Caja de 100g"
+                        placeholder="例如：Caja de 100g"
                         value={sku.nameEs || ''}
                         onChange={(e) => updateSku(sku.tempId!, 'nameEs', e.target.value)}
                         className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-brand-primary"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">变体名称 (阿拉伯语)</label>
+                      <label className="block text-xs font-bold text-slate-600 mb-1">变体名称（阿拉伯语）</label>
                       <input
                         type="text"
-                        placeholder="例如: علبة 100 جرام"
+                        placeholder="例如：علبة 100 جرام"
                         dir="rtl"
                         value={sku.nameAr || ''}
                         onChange={(e) => updateSku(sku.tempId!, 'nameAr', e.target.value)}
@@ -365,20 +365,20 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">显示价格 (Price - 可选)</label>
+                      <label className="block text-xs font-bold text-slate-600 mb-1">显示价格（可选）</label>
                       <input
                         type="text"
-                        placeholder="例如: $12.99"
+                        placeholder="例如：$12.99"
                         value={sku.price || ''}
                         onChange={(e) => updateSku(sku.tempId!, 'price', e.target.value)}
                         className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-brand-primary"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">尺寸/容量 (Size / Volume - 可选)</label>
+                      <label className="block text-xs font-bold text-slate-600 mb-1">尺寸/容量（可选）</label>
                       <input
                         type="text"
-                        placeholder="例如: 100g / 500ml"
+                        placeholder="例如：100g / 500ml"
                         value={sku.size || ''}
                         onChange={(e) => updateSku(sku.tempId!, 'size', e.target.value)}
                         className="w-full text-xs rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-brand-primary"
@@ -393,22 +393,22 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 p-6">
-        <h3 className="text-sm font-bold text-slate-700 mb-3">Short Description</h3>
+        <h3 className="text-sm font-bold text-slate-700 mb-3">简短描述（英文/默认）</h3>
         <RichEditor value={shortDescription} onChange={setShortDescription} minHeight={150} />
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 p-6">
-        <h3 className="text-sm font-bold text-slate-700 mb-3">Full Description</h3>
+        <h3 className="text-sm font-bold text-slate-700 mb-3">产品详情（英文/默认）</h3>
         <RichEditor value={description} onChange={setDescription} minHeight={400} />
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 p-6">
-        <h3 className="text-sm font-bold text-slate-700 mb-3">Specs & Packaging (English / Default)</h3>
+        <h3 className="text-sm font-bold text-slate-700 mb-3">规格与包装（英文/默认）</h3>
         <RichEditor value={specs} onChange={setSpecs} minHeight={300} />
 
         {/* PDF Spec 附件上传区 */}
         <div className="mt-4 pt-4 border-t border-slate-100 space-y-2">
-          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide">Specs & Packaging (PDF 附件卡片 - 可选)</label>
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide">规格与包装 PDF 附件（可选）</label>
           <div className="flex items-center gap-3">
             <input
               type="file"
@@ -423,7 +423,7 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
                   const { url } = await res.json();
                   setSpecsPdf(url);
                 } else {
-                  alert('Upload PDF failed');
+                  alert('PDF 上传失败');
                 }
               }}
               className="hidden"
@@ -457,12 +457,12 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 p-6">
-        <h3 className="text-sm font-bold text-slate-700 mb-3">Formula & MSDS (English / Default)</h3>
+        <h3 className="text-sm font-bold text-slate-700 mb-3">资料/证书/MSDS（英文/默认）</h3>
         <RichEditor value={formula} onChange={setFormula} minHeight={300} />
 
         {/* PDF Formula 附件上传区 */}
         <div className="mt-4 pt-4 border-t border-slate-100 space-y-2">
-          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide">Formula & MSDS / COA (PDF 附件卡片 - 可选)</label>
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide">资料/MSDS/COA PDF 附件（可选）</label>
           <div className="flex items-center gap-3">
             <input
               type="file"
@@ -477,7 +477,7 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
                   const { url } = await res.json();
                   setFormulaPdf(url);
                 } else {
-                  alert('Upload PDF failed');
+                  alert('PDF 上传失败');
                 }
               }}
               className="hidden"
@@ -510,22 +510,22 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
         </div>
       </div>
 
-      <TranslationTabs title="Translations (Product)">
+      <TranslationTabs title="产品多语言翻译">
         {(locale, isRtl) => (
           <>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Name ({locale})</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2">产品名称（{locale}）</label>
               <input
                 type="text"
                 value={nameI18n[locale]}
                 onChange={(e) => setLocale(setNameI18n, nameI18n)(locale, e.target.value)}
-                placeholder="Leave empty to fall back to English"
+                placeholder="不填则使用默认内容"
                 className="w-full rounded-xl border border-slate-200 px-4 py-2.5 outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
                 dir={isRtl ? 'rtl' : 'ltr'}
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Short Description ({locale})</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2">简短描述（{locale}）</label>
               <RichEditor
                 key={`short-${locale}`}
                 value={shortDescI18n[locale]}
@@ -534,7 +534,7 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Full Description ({locale})</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2">产品详情（{locale}）</label>
               <RichEditor
                 key={`desc-${locale}`}
                 value={descI18n[locale]}
@@ -543,7 +543,7 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Specs & Packaging ({locale})</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2">规格与包装（{locale}）</label>
               <RichEditor
                 key={`specs-${locale}`}
                 value={specsI18n[locale]}
@@ -552,7 +552,7 @@ export default function ProductForm({ mode, productId, initial, categories }: Pr
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Formula & MSDS ({locale})</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2">资料/证书/MSDS（{locale}）</label>
               <RichEditor
                 key={`formula-${locale}`}
                 value={formulaI18n[locale]}

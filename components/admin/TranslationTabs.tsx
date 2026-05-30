@@ -12,7 +12,7 @@ const LOCALE_META: Record<TranslationLocale, { label: string; flag: string }> = 
 };
 
 export default function TranslationTabs({
-  title = 'Translations',
+  title = '多语言翻译',
   children,
 }: {
   title?: string;

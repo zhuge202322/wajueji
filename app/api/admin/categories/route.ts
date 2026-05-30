@@ -14,7 +14,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const { name, slug, imageUrl, nameFr, nameEs, nameAr } = body;
-  if (!name || !slug) return NextResponse.json({ error: 'Name and slug required' }, { status: 400 });
+  if (!name || !slug) return NextResponse.json({ error: '请填写分类名称和链接标识' }, { status: 400 });
   const cat = await prisma.category.create({
     data: {
       name, slug, imageUrl: imageUrl || null,

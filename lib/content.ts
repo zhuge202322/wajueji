@@ -3,7 +3,12 @@ import {
   news as fallbackNews,
   products as fallbackProducts
 } from "@/lib/site-data";
-import { getCategoriesData, getPostsData, getProductsData } from "@/lib/cms";
+import {
+  getCategoriesData,
+  getPostsData,
+  getProductBySlug,
+  getProductsData
+} from "@/lib/cms";
 import { slugify } from "@/lib/slug";
 
 export type SiteCategory = {
@@ -13,12 +18,37 @@ export type SiteCategory = {
 };
 
 export type SiteProduct = (typeof fallbackProducts)[number] & {
+  slug: string;
   categorySlug: string;
   categorySlugs: string[];
   categories: SiteCategory[];
 };
 
 type SiteNewsItem = (typeof fallbackNews)[number];
+
+export type SiteProductDetail = SiteProduct & {
+  shortDescriptionHtml: string;
+  descriptionHtml: string;
+  specsHtml: string;
+  formulaHtml: string;
+  specsPdf?: string | null;
+  formulaPdf?: string | null;
+  images: {
+    src: string;
+    alt: string;
+  }[];
+  skus: {
+    id: number;
+    name: string;
+    image: string;
+    images: {
+      src: string;
+      alt: string;
+    }[];
+    price: string;
+    size: string;
+  }[];
+};
 
 function stripHtml(value: string) {
   return value
@@ -65,6 +95,7 @@ export async function getSiteProducts(): Promise<SiteProduct[]> {
 
       return {
         name: stripHtml(product.name || fallback.name),
+        slug: product.slug || slugify(product.name || fallback.name),
         category: primaryCategory.name,
         categorySlug: primaryCategory.slug,
         categorySlugs: categories.length
@@ -78,6 +109,75 @@ export async function getSiteProducts(): Promise<SiteProduct[]> {
     });
   } catch {
     return getFallbackProducts();
+  }
+}
+
+export async function getSiteProductDetail(slug: string): Promise<SiteProductDetail | null> {
+  try {
+    const product = await getProductBySlug(slug, "en");
+    if (!product) return getFallbackProductDetail(slug);
+
+    const fallback = fallbackProducts[0];
+    const categories = (product.categories || [])
+      .map((category: any) => ({
+        name: stripHtml(category.name || ""),
+        slug: category.slug || slugify(category.name || ""),
+        count: 0
+      }))
+      .filter((category: SiteCategory) => category.name && category.slug);
+    const fallbackCategory = {
+      name: fallback.category,
+      slug: slugify(fallback.category),
+      count: 0
+    };
+    const primaryCategory = categories[0] || fallbackCategory;
+    const images = (product.images || [])
+      .map((image: any) => ({
+        src: image.src || "",
+        alt: image.alt || stripHtml(product.name || "")
+      }))
+      .filter((image: { src: string }) => image.src);
+    const specs = compactSpecs(
+      product.specs || "",
+      product.short_description || "",
+      product.description || ""
+    );
+
+    return {
+      name: stripHtml(product.name || ""),
+      slug: product.slug || slug,
+      category: primaryCategory.name,
+      categorySlug: primaryCategory.slug,
+      categorySlugs: categories.length
+        ? categories.map((category: SiteCategory) => category.slug)
+        : [fallbackCategory.slug],
+      categories: categories.length ? categories : [fallbackCategory],
+      image: images[0]?.src || fallback.image,
+      badge: product.featured ? "Featured" : primaryCategory.name,
+      specs: specs.length ? specs : fallback.specs,
+      shortDescriptionHtml: product.short_description || "",
+      descriptionHtml: product.description || "",
+      specsHtml: product.specs || "",
+      formulaHtml: product.formula || "",
+      specsPdf: product.specsPdf,
+      formulaPdf: product.formulaPdf,
+      images: images.length
+        ? images
+        : [{ src: fallback.image, alt: stripHtml(product.name || fallback.name) }],
+      skus: (product.skus || []).map((sku: any) => ({
+        id: Number(sku.id),
+        name: stripHtml(sku.name || ""),
+        image: sku.image || sku.images?.[0]?.src || "",
+        images: (sku.images || []).map((image: any) => ({
+          src: image.src || "",
+          alt: image.alt || stripHtml(sku.name || "")
+        })),
+        price: sku.price || "",
+        size: sku.size || ""
+      }))
+    };
+  } catch {
+    return getFallbackProductDetail(slug);
   }
 }
 
@@ -130,9 +230,11 @@ function getFallbackCategories(): SiteCategory[] {
 function getFallbackProducts(): SiteProduct[] {
   return fallbackProducts.map((product) => {
     const categorySlug = slugify(product.category);
+    const slug = slugify(product.name);
 
     return {
       ...product,
+      slug,
       categorySlug,
       categorySlugs: [categorySlug],
       categories: [
@@ -144,4 +246,21 @@ function getFallbackProducts(): SiteProduct[] {
       ]
     };
   });
+}
+
+function getFallbackProductDetail(slug: string): SiteProductDetail | null {
+  const product = getFallbackProducts().find((item) => item.slug === slug);
+  if (!product) return null;
+
+  return {
+    ...product,
+    shortDescriptionHtml: `<p>${product.specs.join(". ")}.</p>`,
+    descriptionHtml: `<p>${product.name} is part of the Maredigger export supply range. Send your target model, photos, working conditions or part number for compatibility checking and quotation.</p>`,
+    specsHtml: `<ul>${product.specs.map((spec) => `<li>${spec}</li>`).join("")}</ul>`,
+    formulaHtml: "",
+    specsPdf: null,
+    formulaPdf: null,
+    images: [{ src: product.image, alt: product.name }],
+    skus: []
+  };
 }

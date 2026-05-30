@@ -6,7 +6,7 @@ import { getSession, destroySession } from '@/lib/auth';
 export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: '未登录或登录已过期' }, { status: 401 });
   }
 
   const { currentPassword, newPassword } = await req.json();

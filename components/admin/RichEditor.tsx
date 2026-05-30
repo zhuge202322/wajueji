@@ -40,7 +40,7 @@ export default function RichEditor({ value, onChange, minHeight = 300 }: Props) 
   if (!editor) {
     return (
       <div className="border border-slate-200 rounded-xl bg-white p-4 text-slate-400 text-sm">
-        Loading editor...
+        编辑器加载中…
       </div>
     );
   }
@@ -50,7 +50,7 @@ export default function RichEditor({ value, onChange, minHeight = 300 }: Props) 
     fd.append('file', file);
     const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
     if (!res.ok) {
-      alert('Upload failed');
+      alert('上传失败');
       return;
     }
     const { url } = await res.json();
@@ -63,7 +63,7 @@ export default function RichEditor({ value, onChange, minHeight = 300 }: Props) 
 
   function setLink() {
     const previous = editor?.getAttributes('link').href;
-    const url = window.prompt('Enter URL', previous || 'https://');
+    const url = window.prompt('请输入链接地址', previous || 'https://');
     if (url === null) return;
     if (url === '') {
       editor?.chain().focus().extendMarkRange('link').unsetLink().run();
@@ -98,10 +98,10 @@ export default function RichEditor({ value, onChange, minHeight = 300 }: Props) 
   return (
     <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
       <div className="flex flex-wrap items-center gap-1 px-2 py-2 border-b border-slate-200 bg-slate-50">
-        <Btn title="Bold" onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')}><Bold className="w-4 h-4" /></Btn>
-        <Btn title="Italic" onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')}><Italic className="w-4 h-4" /></Btn>
-        <Btn title="Strike" onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive('strike')}><Strikethrough className="w-4 h-4" /></Btn>
-        <Btn title="Code" onClick={() => editor.chain().focus().toggleCode().run()} active={editor.isActive('code')}><Code className="w-4 h-4" /></Btn>
+        <Btn title="加粗" onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')}><Bold className="w-4 h-4" /></Btn>
+        <Btn title="斜体" onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')}><Italic className="w-4 h-4" /></Btn>
+        <Btn title="删除线" onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive('strike')}><Strikethrough className="w-4 h-4" /></Btn>
+        <Btn title="代码" onClick={() => editor.chain().focus().toggleCode().run()} active={editor.isActive('code')}><Code className="w-4 h-4" /></Btn>
 
         <div className="w-px h-6 bg-slate-300 mx-1" />
 
@@ -111,19 +111,19 @@ export default function RichEditor({ value, onChange, minHeight = 300 }: Props) 
 
         <div className="w-px h-6 bg-slate-300 mx-1" />
 
-        <Btn title="Bullet List" onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')}><List className="w-4 h-4" /></Btn>
-        <Btn title="Ordered List" onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')}><ListOrdered className="w-4 h-4" /></Btn>
-        <Btn title="Quote" onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive('blockquote')}><Quote className="w-4 h-4" /></Btn>
+        <Btn title="无序列表" onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')}><List className="w-4 h-4" /></Btn>
+        <Btn title="有序列表" onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')}><ListOrdered className="w-4 h-4" /></Btn>
+        <Btn title="引用" onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive('blockquote')}><Quote className="w-4 h-4" /></Btn>
 
         <div className="w-px h-6 bg-slate-300 mx-1" />
 
-        <Btn title="Link" onClick={setLink} active={editor.isActive('link')}><LinkIcon className="w-4 h-4" /></Btn>
-        <Btn title="Image" onClick={pickImage}><ImageIcon className="w-4 h-4" /></Btn>
+        <Btn title="插入链接" onClick={setLink} active={editor.isActive('link')}><LinkIcon className="w-4 h-4" /></Btn>
+        <Btn title="插入图片" onClick={pickImage}><ImageIcon className="w-4 h-4" /></Btn>
 
         <div className="w-px h-6 bg-slate-300 mx-1" />
 
-        <Btn title="Undo" onClick={() => editor.chain().focus().undo().run()}><Undo2 className="w-4 h-4" /></Btn>
-        <Btn title="Redo" onClick={() => editor.chain().focus().redo().run()}><Redo2 className="w-4 h-4" /></Btn>
+        <Btn title="撤销" onClick={() => editor.chain().focus().undo().run()}><Undo2 className="w-4 h-4" /></Btn>
+        <Btn title="重做" onClick={() => editor.chain().focus().redo().run()}><Redo2 className="w-4 h-4" /></Btn>
       </div>
 
       <EditorContent editor={editor} />

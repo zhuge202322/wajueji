@@ -12,7 +12,7 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
       categories: true,
     },
   });
-  if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  if (!product) return NextResponse.json({ error: '产品不存在' }, { status: 404 });
   return NextResponse.json(product);
 }
 

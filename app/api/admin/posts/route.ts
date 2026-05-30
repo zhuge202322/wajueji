@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     excerptFr, excerptEs, excerptAr,
     contentFr, contentEs, contentAr,
   } = body;
-  if (!title || !slug) return NextResponse.json({ error: 'Title and slug required' }, { status: 400 });
+  if (!title || !slug) return NextResponse.json({ error: '请填写文章标题和链接标识' }, { status: 400 });
 
   const post = await prisma.post.create({
     data: {

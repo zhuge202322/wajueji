@@ -20,7 +20,7 @@ export default function ImageUploader({ value, onChange, label }: Props) {
       fd.append('file', file);
       const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
       if (!res.ok) {
-        alert('Upload failed');
+        alert('上传失败');
         return;
       }
       const { url } = await res.json();
@@ -48,7 +48,7 @@ export default function ImageUploader({ value, onChange, label }: Props) {
             onClick={() => inputRef.current?.click()}
             className="inline-flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50"
           >
-            <Upload className="w-4 h-4" /> {busy ? 'Uploading...' : 'Upload Image'}
+            <Upload className="w-4 h-4" /> {busy ? '上传中…' : '上传图片'}
           </button>
           {value && (
             <button
@@ -56,7 +56,7 @@ export default function ImageUploader({ value, onChange, label }: Props) {
               onClick={() => onChange(null)}
               className="inline-flex items-center gap-2 text-rose-600 text-sm font-medium hover:underline"
             >
-              <X className="w-4 h-4" /> Remove
+              <X className="w-4 h-4" /> 移除
             </button>
           )}
         </div>

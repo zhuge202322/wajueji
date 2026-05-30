@@ -8,14 +8,14 @@ export async function POST(req: NextRequest) {
     const { username, password } = await req.json();
 
     if (!username || !password) {
-      return NextResponse.json({ error: 'Missing credentials' }, { status: 400 });
+      return NextResponse.json({ error: '请填写用户名和密码' }, { status: 400 });
     }
 
     const user = await prisma.adminUser.findUnique({ where: { username } });
-    if (!user) return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    if (!user) return NextResponse.json({ error: '用户名或密码错误' }, { status: 401 });
 
     const ok = await bcrypt.compare(password, user.passwordHash);
-    if (!ok) return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    if (!ok) return NextResponse.json({ error: '用户名或密码错误' }, { status: 401 });
 
     await createSession({ id: user.id, username: user.username });
     return NextResponse.json({ ok: true });
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          'Admin login service is not ready. Check Vercel environment variables and redeploy.'
+          '后台登录服务暂不可用，请检查 Vercel 环境变量并重新部署。'
       },
       { status: 500 }
     );

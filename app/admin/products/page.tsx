@@ -17,12 +17,12 @@ export default async function AdminProductsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-slate-800">Products ({products.length})</h2>
+        <h2 className="text-xl font-bold text-slate-800">产品列表（{products.length}）</h2>
         <Link
           href="/admin/products/new"
           className="inline-flex items-center gap-2 bg-brand-primary text-white px-4 py-2 rounded-xl text-sm font-bold shadow hover:opacity-90 transition"
         >
-          <Plus className="w-4 h-4" /> New Product
+          <Plus className="w-4 h-4" /> 新增产品
         </Link>
       </div>
 
@@ -30,11 +30,11 @@ export default async function AdminProductsPage() {
         <table className="w-full">
           <thead className="bg-slate-50 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">
             <tr>
-              <th className="px-4 py-3">Image</th>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Slug</th>
-              <th className="px-4 py-3">Categories</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-4 py-3">图片</th>
+              <th className="px-4 py-3">产品名称</th>
+              <th className="px-4 py-3">链接标识</th>
+              <th className="px-4 py-3">所属分类</th>
+              <th className="px-4 py-3 text-right">操作</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-sm">
@@ -58,7 +58,7 @@ export default async function AdminProductsPage() {
                       href={`/admin/products/${p.id}`}
                       className="text-brand-primary font-bold hover:underline"
                     >
-                      Edit
+                      编辑
                     </Link>
                     <ProductDeleteButton id={p.id} name={p.name} />
                   </div>
@@ -66,7 +66,7 @@ export default async function AdminProductsPage() {
               </tr>
             ))}
             {products.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-400">No products yet.</td></tr>
+              <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-400">暂无产品。</td></tr>
             )}
           </tbody>
         </table>

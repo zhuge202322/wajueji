@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   } = body;
 
   if (!name || !slug) {
-    return NextResponse.json({ error: 'Name and slug are required' }, { status: 400 });
+    return NextResponse.json({ error: '请填写产品名称和链接标识' }, { status: 400 });
   }
 
   const product = await prisma.product.create({

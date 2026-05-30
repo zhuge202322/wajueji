@@ -18,7 +18,7 @@ export default function MediaUploader({ value, onChange, label, kind = 'image' }
 
   async function upload(file: File) {
     setBusy(true);
-    setProgressText('Preparing...');
+    setProgressText('准备上传…');
     try {
       const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB 一个切片，远远低于 10MB 的限制，100% 安全
       const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
@@ -30,7 +30,7 @@ export default function MediaUploader({ value, onChange, label, kind = 'image' }
         const end = Math.min(start + CHUNK_SIZE, file.size);
         const chunkBlob = file.slice(start, end);
 
-        setProgressText(`Uploading: ${Math.round((chunkIndex / totalChunks) * 100)}% (${chunkIndex + 1}/${totalChunks})`);
+        setProgressText(`上传中：${Math.round((chunkIndex / totalChunks) * 100)}%（${chunkIndex + 1}/${totalChunks}）`);
 
         const res = await fetch('/api/admin/upload', {
           method: 'POST',
@@ -46,7 +46,7 @@ export default function MediaUploader({ value, onChange, label, kind = 'image' }
 
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
-          alert(`Upload failed at chunk ${chunkIndex + 1}: ${errData.error || res.statusText || 'Unknown error'}`);
+          alert(`第 ${chunkIndex + 1} 个分片上传失败：${errData.error || res.statusText || '未知错误'}`);
           return;
         }
 
@@ -56,13 +56,13 @@ export default function MediaUploader({ value, onChange, label, kind = 'image' }
         }
       }
 
-      setProgressText('Success!');
+      setProgressText('上传成功！');
       if (uploadedUrl) {
         onChange(uploadedUrl);
       }
     } catch (e: any) {
       console.error(e);
-      alert(`Upload error: ${e.message || 'connection failed'}`);
+      alert(`上传错误：${e.message || '连接失败'}`);
     } finally {
       setBusy(false);
       setProgressText('');
@@ -97,7 +97,7 @@ export default function MediaUploader({ value, onChange, label, kind = 'image' }
             onClick={() => inputRef.current?.click()}
             className="inline-flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50"
           >
-            <Upload className="w-4 h-4" /> {busy ? (progressText || 'Uploading...') : isVideo ? 'Upload Video' : 'Upload Image'}
+            <Upload className="w-4 h-4" /> {busy ? (progressText || '上传中…') : isVideo ? '上传视频' : '上传图片'}
           </button>
           {value && (
             <button
@@ -105,7 +105,7 @@ export default function MediaUploader({ value, onChange, label, kind = 'image' }
               onClick={() => onChange(null)}
               className="inline-flex items-center gap-2 text-rose-600 text-sm font-medium hover:underline"
             >
-              <X className="w-4 h-4" /> Remove
+              <X className="w-4 h-4" /> 移除
             </button>
           )}
         </div>

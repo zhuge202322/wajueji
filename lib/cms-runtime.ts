@@ -203,17 +203,17 @@ const seedPosts = [
 ] as const;
 
 const seedMedia = [
-  ["company_phone", "Company Phone", "86-13647375320", "text"],
-  ["company_email", "Company Email", "sales@maredigger.com", "text"],
+  ["company_phone", "公司电话", "86-13647375320", "text"],
+  ["company_email", "公司邮箱", "sales@maredigger.com", "text"],
   [
     "company_address",
-    "Company Address",
+    "公司地址",
     "Room 420, No. 28 Xiaotang Road Community, Quantang Subdistrict, Changsha County, Hunan, China",
     "text"
   ],
   ["whatsapp", "WhatsApp", "86-13647375320", "text"],
-  ["site_logo", "Site Logo", "/logo.png", "image"],
-  ["hero_image", "Home Hero Image", "/images/hero-excavator.jpg", "image"]
+  ["site_logo", "网站 Logo", "/logo.png", "image"],
+  ["hero_image", "首页主图", "/images/hero-excavator.jpg", "image"]
 ] as const;
 
 let ensurePromise: Promise<void> | null = null;

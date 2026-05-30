@@ -2,7 +2,7 @@ import { headers } from 'next/headers';
 import AdminShell from '@/components/admin/AdminShell';
 
 export const metadata = {
-  title: 'Maredigger CMS — Admin',
+  title: 'Maredigger CMS 后台管理',
 };
 
 export default async function AdminLayout({

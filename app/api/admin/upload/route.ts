@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       const file = form.get('file');
 
       if (!file || !(file instanceof Blob)) {
-        return NextResponse.json({ error: 'No file found in formData' }, { status: 400 });
+        return NextResponse.json({ error: '未找到上传文件' }, { status: 400 });
       }
 
       const realName = (file as any).name || 'upload.png';
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       const chunkTotal = req.headers.get('x-chunk-total');
 
       if (!req.body) {
-        return NextResponse.json({ error: 'Empty body stream' }, { status: 400 });
+        return NextResponse.json({ error: '上传内容为空' }, { status: 400 });
       }
 
       // 如果有分片上传信息
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error('Upload Error Details:', error);
     return NextResponse.json(
-      { error: error?.message || 'Server upload internal error' },
+      { error: error?.message || '服务器上传处理失败' },
       { status: 500 }
     );
   }
