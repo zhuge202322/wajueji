@@ -26,31 +26,34 @@ export const navItems = [
 ];
 
 export const categories = [
-  { name: "All Products", count: 48 },
-  { name: "Used Excavators", count: 16 },
-  { name: "New Excavators", count: 8 },
-  { name: "Mini Excavators", count: 9 },
-  { name: "Excavator Spare Parts", count: 15 },
-  { name: "Hydraulic Parts", count: 12 },
-  { name: "Engine Parts", count: 10 },
-  { name: "Undercarriage Parts", count: 11 },
-  { name: "Buckets & Attachments", count: 14 }
+  { name: "All Products", count: 195 },
+  { name: "Excavator", count: 105 },
+  { name: "Caterpillar", count: 50 },
+  { name: "Loader", count: 33 },
+  { name: "Bulldozer", count: 32 },
+  { name: "Hitachi", count: 17 },
+  { name: "Hyundai", count: 15 },
+  { name: "Komatsu", count: 9 },
+  { name: "Truck Trailer", count: 8 },
+  { name: "Grader", count: 7 },
+  { name: "Roller", count: 5 },
+  { name: "Forklift", count: 5 }
 ];
 
 export const productGroups = [
   {
-    name: "Used Excavators",
-    summary: "Inspected second-hand crawler excavators prepared for export.",
+    name: "Excavator",
+    summary: "Used crawler excavators and brand categories prepared for export.",
     image: "/images/crawler-excavator.jpg"
   },
   {
-    name: "New Excavators",
-    summary: "Compact and medium machines for construction, earthwork and farms.",
+    name: "Loader",
+    summary: "Wheel loaders and front-end loaders for construction and earthwork.",
     image: "/images/hero-excavator.jpg"
   },
   {
-    name: "Excavator Parts",
-    summary: "Hydraulic, engine, undercarriage and service parts in one shipment.",
+    name: "Bulldozer",
+    summary: "Crawler bulldozers and heavy machines for site preparation.",
     image: "/images/excavator-bucket.jpg"
   }
 ];

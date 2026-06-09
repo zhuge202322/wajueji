@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { ChevronDown, Globe2, Menu, Phone, Search, X } from "lucide-react";
+import { ChevronDown, Globe2, MapPin, Menu, Phone, Search, X } from "lucide-react";
 import { company, navItems } from "@/lib/site-data";
 
 export function Header() {
@@ -19,20 +19,15 @@ export function Header() {
     <header className="site-header">
       <div className="utility-bar">
         <div className="container utility-bar__inner">
-          <form className="search" onSubmit={handleSearch} role="search">
-            <Search size={16} aria-hidden="true" />
-            <input aria-label="Search products" placeholder="Excavator parts" />
-            <button type="submit">Search</button>
-          </form>
+          <div className="utility-welcome">Welcome to {company.name}</div>
           <div className="utility-actions">
             <a className="utility-link" href={`tel:${company.phone}`}>
               <Phone size={16} aria-hidden="true" />
               <span>{company.phone}</span>
             </a>
-            <span className="language">
-              <Globe2 size={16} aria-hidden="true" />
-              English
-              <ChevronDown size={14} aria-hidden="true" />
+            <span className="utility-link utility-link--address">
+              <MapPin size={16} aria-hidden="true" />
+              <span>{company.address}</span>
             </span>
           </div>
         </div>
@@ -64,10 +59,17 @@ export function Header() {
               );
             })}
           </nav>
-          <Link className="quote-button" href="/contact-us">
-            <Phone size={17} aria-hidden="true" />
-            Chat Now
-          </Link>
+          <div className="nav-tools">
+            <form className="search" onSubmit={handleSearch} role="search">
+              <Search size={17} aria-hidden="true" />
+              <input aria-label="Search products" placeholder="Search" />
+            </form>
+            <span className="language">
+              <Globe2 size={16} aria-hidden="true" />
+              Language
+              <ChevronDown size={14} aria-hidden="true" />
+            </span>
+          </div>
           <button
             className="menu-toggle"
             type="button"

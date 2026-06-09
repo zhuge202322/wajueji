@@ -5,9 +5,11 @@ import {
 } from "@/lib/site-data";
 import {
   getCategoriesData,
+  getFeaturedProductsData,
   getPostsData,
   getProductBySlug,
-  getProductsData
+  getProductsData,
+  getProductsPageData
 } from "@/lib/cms";
 import { slugify } from "@/lib/slug";
 
@@ -22,6 +24,8 @@ export type SiteProduct = (typeof fallbackProducts)[number] & {
   categorySlug: string;
   categorySlugs: string[];
   categories: SiteCategory[];
+  price?: string;
+  minOrder?: string;
 };
 
 type SiteNewsItem = (typeof fallbackNews)[number];
@@ -50,6 +54,13 @@ export type SiteProductDetail = SiteProduct & {
   }[];
 };
 
+export type SiteProductPage = {
+  products: SiteProduct[];
+  total: number;
+  currentPage: number;
+  totalPages: number;
+};
+
 function stripHtml(value: string) {
   return value
     .replace(/<br\s*\/?>/gi, "\n")
@@ -59,7 +70,21 @@ function stripHtml(value: string) {
     .trim();
 }
 
+function tableSpecs(value: string) {
+  return [...value.matchAll(/<tr\b[\s\S]*?<\/tr>/gi)]
+    .map((rowMatch) => {
+      const cells = [...rowMatch[0].matchAll(/<t[dh]\b[^>]*>([\s\S]*?)<\/t[dh]>/gi)]
+        .map((cell) => stripHtml(cell[1]).replace(/:$/, "").trim())
+        .filter(Boolean);
+      return cells.length >= 2 ? `${cells[0]}: ${cells.slice(1).join(" ")}` : "";
+    })
+    .filter(Boolean);
+}
+
 function compactSpecs(...values: string[]) {
+  const rows = values.flatMap((value) => tableSpecs(value));
+  if (rows.length) return rows.slice(0, 4);
+
   const lines = values
     .flatMap((value) => stripHtml(value).split(/\n|\.|;|,/))
     .map((value) => value.trim())
@@ -73,42 +98,63 @@ export async function getSiteProducts(): Promise<SiteProduct[]> {
     const cmsProducts = await getProductsData("en");
     if (!cmsProducts.length) return getFallbackProducts();
 
-    return cmsProducts.map((product: any, index: number) => {
-      const fallback = fallbackProducts[index % fallbackProducts.length];
-      const categories = (product.categories || [])
-        .map((category: any) => ({
-          name: stripHtml(category.name || ""),
-          slug: category.slug || slugify(category.name || "")
-        }))
-        .filter((category: SiteCategory) => category.name && category.slug);
-      const fallbackCategory = {
-        name: fallback.category,
-        slug: slugify(fallback.category),
-        count: 0
-      };
-      const primaryCategory = categories[0] || fallbackCategory;
-      const specs = compactSpecs(
-        product.specs || "",
-        product.short_description || "",
-        product.description || ""
-      );
-
-      return {
-        name: stripHtml(product.name || fallback.name),
-        slug: product.slug || slugify(product.name || fallback.name),
-        category: primaryCategory.name,
-        categorySlug: primaryCategory.slug,
-        categorySlugs: categories.length
-          ? categories.map((category: SiteCategory) => category.slug)
-          : [fallbackCategory.slug],
-        categories: categories.length ? categories : [fallbackCategory],
-        image: product.images?.[0]?.src || fallback.image,
-        badge: product.featured ? "Featured" : primaryCategory.name,
-        specs: specs.length ? specs : fallback.specs
-      };
-    });
+    return cmsProducts.map(mapCmsProductToSite);
   } catch {
     return getFallbackProducts();
+  }
+}
+
+export async function getSiteFeaturedProducts(limit = 4): Promise<SiteProduct[]> {
+  try {
+    const cmsProducts = await getFeaturedProductsData(limit, "en");
+    if (!cmsProducts.length) return getFallbackProducts().slice(0, limit);
+
+    return cmsProducts.map(mapCmsProductToSite);
+  } catch {
+    return getFallbackProducts().slice(0, limit);
+  }
+}
+
+export async function getSiteProductPage({
+  categorySlug,
+  page,
+  pageSize
+}: {
+  categorySlug?: string;
+  page: number;
+  pageSize: number;
+}): Promise<SiteProductPage> {
+  try {
+    const productPage = await getProductsPageData({
+      categorySlug,
+      page,
+      pageSize,
+      locale: "en"
+    });
+
+    return {
+      products: productPage.products.map(mapCmsProductToSite),
+      total: productPage.total,
+      currentPage: productPage.currentPage,
+      totalPages: productPage.totalPages
+    };
+  } catch {
+    const fallbackProductsList = getFallbackProducts();
+    const visibleProducts = categorySlug
+      ? fallbackProductsList.filter((product) =>
+          product.categorySlugs.includes(categorySlug)
+        )
+      : fallbackProductsList;
+    const totalPages = Math.max(1, Math.ceil(visibleProducts.length / pageSize));
+    const currentPage = Math.min(Math.max(page, 1), totalPages);
+    const start = (currentPage - 1) * pageSize;
+
+    return {
+      products: visibleProducts.slice(start, start + pageSize),
+      total: visibleProducts.length,
+      currentPage,
+      totalPages
+    };
   }
 }
 
@@ -130,7 +176,11 @@ export async function getSiteProductDetail(slug: string): Promise<SiteProductDet
       slug: slugify(fallback.category),
       count: 0
     };
-    const primaryCategory = categories[0] || fallbackCategory;
+    const primaryCategory =
+      [...categories].reverse().find((category) => category.slug !== "products") ||
+      categories[0] ||
+      fallbackCategory;
+    const firstSku = product.skus?.[0];
     const images = (product.images || [])
       .map((image: any) => ({
         src: image.src || "",
@@ -155,6 +205,8 @@ export async function getSiteProductDetail(slug: string): Promise<SiteProductDet
       image: images[0]?.src || fallback.image,
       badge: product.featured ? "Featured" : primaryCategory.name,
       specs: specs.length ? specs : fallback.specs,
+      price: firstSku?.price || "Contact for quote",
+      minOrder: firstSku?.size || "1 Unit",
       shortDescriptionHtml: product.short_description || "",
       descriptionHtml: product.description || "",
       specsHtml: product.specs || "",
@@ -186,10 +238,15 @@ export async function getSiteCategories(): Promise<SiteCategory[]> {
     const cmsCategories = await getCategoriesData("en");
     if (!cmsCategories.length) return getFallbackCategories();
 
-    const total = cmsCategories.reduce(
-      (sum: number, category: any) => sum + Number(category.count || 0),
-      0
+    const rootCount = Number(
+      cmsCategories.find((category: any) => category.slug === "products")?.count || 0
     );
+    const total =
+      rootCount ||
+      cmsCategories.reduce(
+        (sum: number, category: any) => sum + Number(category.count || 0),
+        0
+      );
 
     return [
       { name: "All Products", slug: "", count: total || cmsCategories.length },
@@ -202,6 +259,48 @@ export async function getSiteCategories(): Promise<SiteCategory[]> {
   } catch {
     return getFallbackCategories();
   }
+}
+
+function mapCmsProductToSite(product: any, index: number): SiteProduct {
+  const fallback = fallbackProducts[index % fallbackProducts.length];
+  const categories = (product.categories || [])
+    .map((category: any) => ({
+      name: stripHtml(category.name || ""),
+      slug: category.slug || slugify(category.name || ""),
+      count: Number(category.count || 0)
+    }))
+    .filter((category: SiteCategory) => category.name && category.slug);
+  const fallbackCategory = {
+    name: fallback.category,
+    slug: slugify(fallback.category),
+    count: 0
+  };
+  const primaryCategory =
+    [...categories].reverse().find((category) => category.slug !== "products") ||
+    categories[0] ||
+    fallbackCategory;
+  const firstSku = product.skus?.[0];
+  const specs = compactSpecs(
+    product.specs || "",
+    product.short_description || "",
+    product.description || ""
+  );
+
+  return {
+    name: stripHtml(product.name || fallback.name),
+    slug: product.slug || slugify(product.name || fallback.name),
+    category: primaryCategory.name,
+    categorySlug: primaryCategory.slug,
+    categorySlugs: categories.length
+      ? categories.map((category: SiteCategory) => category.slug)
+      : [fallbackCategory.slug],
+    categories: categories.length ? categories : [fallbackCategory],
+    image: product.images?.[0]?.src || fallback.image,
+    badge: product.featured ? "Featured" : primaryCategory.name,
+    specs: specs.length ? specs : fallback.specs,
+    price: firstSku?.price || "Contact for quote",
+    minOrder: firstSku?.size || "1 Unit"
+  };
 }
 
 export async function getSiteNews(): Promise<SiteNewsItem[]> {
@@ -243,7 +342,9 @@ function getFallbackProducts(): SiteProduct[] {
           slug: categorySlug,
           count: 0
         }
-      ]
+      ],
+      price: "Contact for quote",
+      minOrder: "1 Unit"
     };
   });
 }

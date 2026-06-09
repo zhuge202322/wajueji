@@ -10,6 +10,8 @@ type ProductCardProps = {
     image: string;
     badge: string;
     specs: string[];
+    price?: string;
+    minOrder?: string;
   };
 };
 
@@ -27,8 +29,12 @@ export function ProductCard({ product }: ProductCardProps) {
         <h3>
           <Link href={detailHref}>{product.name}</Link>
         </h3>
+        <div className="product-card__trade">
+          <strong>{product.price || "Contact for quote"}</strong>
+          <span>Min Order: {product.minOrder || "1 Unit"}</span>
+        </div>
         <ul>
-          {product.specs.map((spec) => (
+          {product.specs.slice(0, 3).map((spec) => (
             <li key={spec}>
               <CheckCircle2 size={15} aria-hidden="true" />
               {spec}

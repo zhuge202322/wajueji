@@ -4,6 +4,58 @@ import { getCurrentLocale } from './locale';
 
 export type Locale = 'en' | 'fr' | 'es' | 'ar';
 
+const productSummarySelect = {
+  id: true,
+  name: true,
+  slug: true,
+  featured: true,
+  sortOrder: true,
+  nameFr: true,
+  nameEs: true,
+  nameAr: true,
+  shortDescription: true,
+  shortDescriptionFr: true,
+  shortDescriptionEs: true,
+  shortDescriptionAr: true,
+  specs: true,
+  specsFr: true,
+  specsEs: true,
+  specsAr: true,
+  images: {
+    orderBy: { sortOrder: 'asc' as const },
+    take: 1,
+    select: {
+      id: true,
+      src: true,
+      alt: true,
+    },
+  },
+  categories: {
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      nameFr: true,
+      nameEs: true,
+      nameAr: true,
+    },
+  },
+  skus: {
+    orderBy: { sortOrder: 'asc' as const },
+    take: 1,
+    select: {
+      id: true,
+      name: true,
+      nameFr: true,
+      nameEs: true,
+      nameAr: true,
+      image: true,
+      price: true,
+      size: true,
+    },
+  },
+} as const;
+
 async function resolveLocale(locale?: Locale): Promise<Locale> {
   if (locale) return locale;
   return getCurrentLocale();
@@ -22,38 +74,61 @@ export async function getProductsData(locale?: Locale) {
   const loc = await resolveLocale(locale);
   const products = await prisma.product.findMany({
     orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
-    include: {
-      images: { orderBy: { sortOrder: 'asc' } },
-      categories: true,
-      skus: { include: { images: { orderBy: { sortOrder: 'asc' } } } },
-    },
+    select: productSummarySelect,
   });
   return products.map((p) => formatProduct(p, loc));
 }
 
-export async function getFeaturedProductsData(locale?: Locale) {
+export async function getProductsPageData({
+  categorySlug,
+  page = 1,
+  pageSize = 6,
+  locale,
+}: {
+  categorySlug?: string;
+  page?: number;
+  pageSize?: number;
+  locale?: Locale;
+}) {
+  const loc = await resolveLocale(locale);
+  const where = categorySlug
+    ? { categories: { some: { slug: categorySlug } } }
+    : undefined;
+  const total = await prisma.product.count({ where });
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const currentPage = Math.min(Math.max(page, 1), totalPages);
+  const products = await prisma.product.findMany({
+    where,
+    orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
+    skip: (currentPage - 1) * pageSize,
+    take: pageSize,
+    select: productSummarySelect,
+  });
+
+  return {
+    products: products.map((p) => formatProduct(p, loc)),
+    total,
+    currentPage,
+    totalPages,
+  };
+}
+
+export async function getFeaturedProductsData(limit = 8, locale?: Locale) {
   const loc = await resolveLocale(locale);
   // 先找设为热门的
   let products = await prisma.product.findMany({
     where: { featured: true },
     orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
-    include: {
-      images: { orderBy: { sortOrder: 'asc' } },
-      categories: true,
-      skus: { include: { images: { orderBy: { sortOrder: 'asc' } } } },
-    },
+    take: limit,
+    select: productSummarySelect,
   });
 
   // 如果后台一个热门也没设，默认拿前 8 个
   if (products.length === 0) {
     products = await prisma.product.findMany({
       orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
-      take: 8,
-      include: {
-        images: { orderBy: { sortOrder: 'asc' } },
-        categories: true,
-        skus: { include: { images: { orderBy: { sortOrder: 'asc' } } } },
-      },
+      take: limit,
+      select: productSummarySelect,
     });
   }
   return products.map((p) => formatProduct(p, loc));

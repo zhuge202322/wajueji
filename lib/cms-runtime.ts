@@ -1,5 +1,6 @@
 import type { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import referenceProductsData from '@/prisma/reference-products.json';
 
 type CmsPrismaClient = PrismaClient;
 
@@ -140,48 +141,48 @@ const schemaStatements = [
   `CREATE INDEX IF NOT EXISTS "PageView_visitorId_idx" ON "PageView"("visitorId")`
 ];
 
-const seedCategories = [
-  ["Used Excavators", "used-excavators", "/images/crawler-excavator.jpg"],
-  ["New Excavators", "new-excavators", "/images/hero-excavator.jpg"],
-  ["Excavator Spare Parts", "excavator-spare-parts", "/images/excavator-bucket.jpg"],
-  ["Buckets & Attachments", "buckets-attachments", "/images/parts-bucket.jpg"]
-] as const;
+type ReferenceCategory = {
+  name: string;
+  slug: string;
+  imageUrl: string;
+  sortOrder?: number;
+};
 
-const seedProducts = [
-  {
-    name: "MD220LC Used Crawler Excavator",
-    slug: "md220lc-used-crawler-excavator",
-    category: "used-excavators",
-    image: "/images/crawler-excavator.jpg",
-    featured: true,
-    shortDescription: "Inspected 22 ton class used crawler excavator prepared for export.",
-    description:
-      "Reliable second-hand crawler excavator for earthwork, construction and rental fleet buyers. Inspection photos, working video and loading plan can be prepared before shipment.",
-    specs: "22 ton class<br />Hydraulic crawler<br />Export inspection available"
-  },
-  {
-    name: "Compact 6 Ton New Excavator",
-    slug: "compact-6-ton-new-excavator",
-    category: "new-excavators",
-    image: "/images/hero-excavator.jpg",
-    featured: true,
-    shortDescription: "Compact new excavator for construction, farms and municipal projects.",
-    description:
-      "Factory supply compact excavator with flexible cab or canopy options and practical delivery schedule for overseas distributors.",
-    specs: "Low fuel consumption<br />Cab or canopy options<br />Quick delivery"
-  },
-  {
-    name: "Excavator Bucket Replacement",
-    slug: "excavator-bucket-replacement",
-    category: "buckets-attachments",
-    image: "/images/excavator-bucket.jpg",
-    featured: true,
-    shortDescription: "Standard and rock buckets with pins, teeth and fitment support.",
-    description:
-      "Bucket replacement and attachment sourcing for different excavator models. Provide model, pin size and application for compatibility checking.",
-    specs: "Rock and standard buckets<br />Pins and teeth support<br />OEM fit check"
-  }
-] as const;
+type ReferenceProduct = {
+  name: string;
+  slug: string;
+  categorySlugs: string[];
+  primaryCategorySlug: string;
+  image: string;
+  galleryImages?: string[];
+  detailImages?: string[];
+  price?: string;
+  minOrder?: string;
+  featured?: boolean;
+  sortOrder?: number;
+  shortDescription: string;
+  description: string;
+  specs: string;
+};
+
+const referenceData = referenceProductsData as {
+  categories: ReferenceCategory[];
+  products: ReferenceProduct[];
+};
+
+const legacyDemoProductSlugs = [
+  "md220lc-used-crawler-excavator",
+  "compact-6-ton-new-excavator",
+  "excavator-bucket-replacement",
+  "aaaa"
+];
+
+const legacyDemoCategorySlugs = [
+  "used-excavators",
+  "new-excavators",
+  "excavator-spare-parts",
+  "buckets-attachments"
+];
 
 const seedPosts = [
   {
@@ -266,30 +267,106 @@ async function seedCmsDatabase(prisma: CmsPrismaClient) {
     });
   }
 
-  for (const [name, slug, imageUrl] of seedCategories) {
+  await prisma.product.deleteMany({
+    where: { slug: { in: legacyDemoProductSlugs } }
+  });
+
+  for (const item of referenceData.categories) {
     await prisma.category.upsert({
-      where: { slug },
-      update: { name, imageUrl },
-      create: { name, slug, imageUrl }
+      where: { slug: item.slug },
+      update: {
+        name: item.name,
+        imageUrl: item.imageUrl,
+        sortOrder: item.sortOrder || 0
+      },
+      create: {
+        name: item.name,
+        slug: item.slug,
+        imageUrl: item.imageUrl,
+        sortOrder: item.sortOrder || 0
+      }
     });
   }
 
-  for (const item of seedProducts) {
-    const exists = await prisma.product.findUnique({ where: { slug: item.slug } });
-    if (exists) continue;
+  for (const slug of legacyDemoCategorySlugs) {
+    const category = await prisma.category.findUnique({
+      where: { slug },
+      include: { _count: { select: { products: true } } }
+    });
+    if (category && category._count.products === 0) {
+      await prisma.category.delete({ where: { slug } });
+    }
+  }
 
-    const category = await prisma.category.findUnique({ where: { slug: item.category } });
-    await prisma.product.create({
-      data: {
+  for (const item of referenceData.products) {
+    const categorySlugs = item.categorySlugs?.length
+      ? item.categorySlugs
+      : [item.primaryCategorySlug].filter(Boolean);
+    const categories = await prisma.category.findMany({
+      where: { slug: { in: categorySlugs } }
+    });
+    const product = await prisma.product.upsert({
+      where: { slug: item.slug },
+      update: {
+        name: item.name,
+        shortDescription: item.shortDescription,
+        description: item.description,
+        specs: item.specs,
+        featured: Boolean(item.featured),
+        sortOrder: item.sortOrder || 0,
+        categories: categories.length
+          ? { set: categories.map((category) => ({ id: category.id })) }
+          : undefined
+      },
+      create: {
         name: item.name,
         slug: item.slug,
         shortDescription: item.shortDescription,
         description: item.description,
         specs: item.specs,
-        featured: item.featured,
-        categories: category ? { connect: [{ id: category.id }] } : undefined,
+        featured: Boolean(item.featured),
+        sortOrder: item.sortOrder || 0,
+        categories: categories.length
+          ? { connect: categories.map((category) => ({ id: category.id })) }
+          : undefined
+      }
+    });
+
+    await prisma.productImage.deleteMany({
+      where: { productId: product.id }
+    });
+    const productImages = [
+      ...(item.galleryImages?.length ? item.galleryImages : [item.image]),
+      ...(item.detailImages || [])
+    ].filter(Boolean);
+    const uniqueProductImages = [...new Set(productImages)];
+    await prisma.productImage.createMany({
+      data: uniqueProductImages.map((src, index) => ({
+        productId: product.id,
+        src,
+        alt: item.name,
+        sortOrder: index
+      }))
+    });
+
+    await prisma.productSku.deleteMany({
+      where: { productId: product.id }
+    });
+    const skuImages = (item.galleryImages?.length ? item.galleryImages : [item.image]).filter(Boolean);
+    await prisma.productSku.create({
+      data: {
+        productId: product.id,
+        name: item.name,
+        image: skuImages[0] || item.image,
+        price: item.price || "Contact for quote",
+        size: item.minOrder || "1 Unit",
+        sortOrder: 0,
         images: {
-          create: [{ src: item.image, alt: item.name, sortOrder: 0 }]
+          create: [...new Set(skuImages)].map((src, index) => ({
+            src,
+            alt: item.name,
+            sortOrder: index
+          }))
         }
       }
     });

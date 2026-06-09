@@ -49,6 +49,8 @@ export default async function ProductDetailPage({
   if (!product) notFound();
 
   const mainImage = product.images[0]?.src || product.image;
+  const productDetailsImages = extractHtmlImageSources(product.descriptionHtml);
+  const productDetailsHtml = removeInlineImages(product.descriptionHtml);
 
   return (
     <>
@@ -89,7 +91,7 @@ export default async function ProductDetailPage({
             </div>
             {product.images.length > 1 && (
               <div className="product-detail__thumbs">
-                {product.images.slice(0, 6).map((image) => (
+                {product.images.slice(0, 12).map((image) => (
                   <div className="product-detail__thumb" key={image.src}>
                     <Image
                       src={image.src}
@@ -133,7 +135,8 @@ export default async function ProductDetailPage({
           <div className="product-detail-content__main">
             <RichSection
               title="Product Details"
-              html={product.descriptionHtml}
+              html={productDetailsHtml}
+              images={productDetailsImages}
               fallback="Send product model, jobsite condition or target port for details and availability."
             />
             <RichSection
@@ -208,10 +211,12 @@ export default async function ProductDetailPage({
 function RichSection({
   title,
   html,
+  images = [],
   fallback
 }: {
   title: string;
   html: string;
+  images?: string[];
   fallback: string;
 }) {
   return (
@@ -222,8 +227,47 @@ function RichSection({
       ) : (
         <p>{fallback}</p>
       )}
+      {images.length > 0 && (
+        <div className="reference-detail-gallery">
+          {images.map((src, index) => (
+            <figure key={`${src}-${index}`}>
+              <Image
+                src={src}
+                alt={`${title} image ${index + 1}`}
+                width={800}
+                height={600}
+                sizes="(min-width: 900px) 360px, 100vw"
+              />
+            </figure>
+          ))}
+        </div>
+      )}
     </article>
   );
+}
+
+function extractHtmlImageSources(html: string) {
+  const sources = [...html.matchAll(/<img\b[^>]*\bsrc=(["'])(.*?)\1/gi)]
+    .map((match) => decodeHtml(match[2]))
+    .filter((src) => src.startsWith("http://") || src.startsWith("https://") || src.startsWith("/"));
+
+  return [...new Set(sources)];
+}
+
+function removeInlineImages(html: string) {
+  return html
+    .replace(/<div class=["']reference-detail-gallery["'][\s\S]*?<\/div>/gi, "")
+    .replace(/<figure>\s*<img\b[^>]*>\s*<\/figure>/gi, "")
+    .replace(/<img\b[^>]*>/gi, "");
+}
+
+function decodeHtml(value: string) {
+  return value
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
 }
 
 function DownloadLink({ href, label }: { href: string; label: string }) {
