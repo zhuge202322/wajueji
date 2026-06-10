@@ -1572,6 +1572,40 @@ textarea {
   margin-top: 4px;
 }
 
+.footer-social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.footer-social a {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.footer-social a:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.footer-social a[aria-disabled="true"] {
+  cursor: default;
+  opacity: 0.72;
+}
+
 .footer-cta {
   width: fit-content;
   margin-top: 10px;

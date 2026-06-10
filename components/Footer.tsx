@@ -1,9 +1,38 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Phone, Send } from "lucide-react";
 import { categories, company, navItems } from "@/lib/site-data";
 
+const socialItems = [
+  { key: "social_fb", label: "FB" },
+  { key: "social_ins", label: "INS" },
+  { key: "social_ws", label: "WS" },
+  { key: "social_tk", label: "TK" }
+];
+
 export function Footer() {
+  const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    let active = true;
+
+    fetch("/api/site-media")
+      .then((res) => (res.ok ? res.json() : {}))
+      .then((data) => {
+        if (active) setSocialLinks(data || {});
+      })
+      .catch(() => {
+        if (active) setSocialLinks({});
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <footer className="site-footer">
       <div className="container footer-grid">
@@ -19,6 +48,25 @@ export function Footer() {
               <MapPin size={16} aria-hidden="true" />
               {company.address}
             </span>
+          </div>
+          <div className="footer-social" aria-label="Social media links">
+            {socialItems.map((item) => {
+              const href = socialLinks[item.key]?.trim() || "";
+              return (
+                <a
+                  href={href || "#"}
+                  aria-disabled={!href}
+                  onClick={(event) => {
+                    if (!href) event.preventDefault();
+                  }}
+                  target={href ? "_blank" : undefined}
+                  rel={href ? "noreferrer" : undefined}
+                  key={item.key}
+                >
+                  {item.label}
+                </a>
+              );
+            })}
           </div>
         </div>
         <div>
