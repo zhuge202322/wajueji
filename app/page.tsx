@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
+import { CooperativePartner } from "@/components/CooperativePartner";
+import { HomeHeroCarousel } from "@/components/HomeHeroCarousel";
 import {
   company,
   stats,
@@ -51,19 +53,6 @@ const productSeries = [
   }
 ];
 
-const partnerBrands = [
-  "CAT",
-  "Komatsu",
-  "Hitachi",
-  "Volvo",
-  "SANY",
-  "XCMG",
-  "Doosan",
-  "Hyundai",
-  "Kobelco",
-  "Kubota"
-];
-
 const newsImages = [
   "/images/crawler-excavator.jpg",
   "/images/hero-excavator.jpg",
@@ -79,37 +68,7 @@ export default async function Home() {
 
   return (
     <>
-      <section className="home-banner">
-        <div className="home-banner__slide">
-          <Image
-            className="home-banner__image"
-            src="/images/hero-excavator.jpg"
-            alt="Crawler excavator working at an earthwork site"
-            fill
-            priority
-            sizes="100vw"
-          />
-          <div className="home-banner__shade" />
-          <div className="container home-banner__content">
-            <h1>
-              {company.name} offers reliable excavators and spare parts for
-              global machinery buyers.
-            </h1>
-            <YuYiButton href="/products">View More</YuYiButton>
-          </div>
-          <button className="home-banner__arrow home-banner__arrow--prev" aria-label="Previous slide">
-            ‹
-          </button>
-          <button className="home-banner__arrow home-banner__arrow--next" aria-label="Next slide">
-            ›
-          </button>
-          <div className="home-banner__dots" aria-hidden="true">
-            <span className="is-active" />
-            <span />
-            <span />
-          </div>
-        </div>
-      </section>
+      <HomeHeroCarousel />
 
       <section className="yuyi-section products-series">
         <div className="container">
@@ -197,39 +156,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="cooperative-partner">
-        <div className="container">
-          <YuyiCenteredHeading
-            title="Cooperative"
-            highlight="Partner"
-            text="Support for common excavator brands, compatible parts and export sourcing across construction machinery projects."
-            href="/contact-us"
-            actionText="Contact Us Now >>"
-            linkOnly
-          />
-          <div className="cooperative-layout">
-            <div className="partner-earth" aria-hidden="true">
-              <span />
-            </div>
-            <div className="cooperative-content">
-              <strong>20</strong>
-              <p>Brand Choice</p>
-              <div className="brand-board">
-                {partnerBrands.map((brand) => (
-                  <div className="brand-logo-card" key={brand}>
-                    {brand}
-                  </div>
-                ))}
-              </div>
-              <div className="line-dots" aria-hidden="true">
-                <span className="is-active" />
-                <span />
-                <span />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <CooperativePartner />
 
       <section className="about-yuyi">
         <div className="container">
